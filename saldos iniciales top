@@ -1,0 +1,94 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZSALDOS_INICIALES_TOP
+*&---------------------------------------------------------------------*
+TABLES: bsis, bsik, bsid.
+"se agregan las estructuras"
+
+DATA: it_ctasmayor    TYPE STANDARD TABLE OF zst_bsis, "Cuentas de mayor"
+      it_pasproveedor TYPE STANDARD TABLE OF zst_bsik, "Pas Proveedor (AP)"
+      it_pasdeudor    TYPE STANDARD TABLE OF zst_bsid, "Pas Deudor (AR)"
+      it_faglflexa    TYPE STANDARD TABLE OF zst_faglflexa, "Para cuentas de mayor solo saldo es mejor consultar la faglflexa.
+      it_ctasmayoraux TYPE STANDARD TABLE OF zst_bsis,
+      it_mapeo        TYPE STANDARD TABLE OF zta_dmapar, " tabla de equivalencias ecc-hana
+      wa_mapeo        TYPE zta_dmapar,
+
+      it_layoutsi     TYPE STANDARD TABLE OF zst_cargasini, "Layout txt".
+      wa_layoutsi     TYPE zst_cargasini,
+      wa_layoutap     TYPE zst_cargasini.
+
+DATA: ld_filename TYPE string,
+      ld_path     TYPE string,
+      ld_fullpath TYPE string,
+      ld_result   TYPE i,
+      gd_file     TYPE c,
+      lv_file     TYPE string,
+      lv_anio(4)  TYPE c,
+      lv_mes(2)   TYPE c,
+      lv_dia(2)   TYPE c.
+
+"Define Field Symbols"
+FIELD-SYMBOLS:
+  <fs_ctasmayor>    TYPE zst_bsis,
+  <fs_pasproveedor> TYPE zst_bsik,
+  <fs_pasdeudor>    TYPE zst_bsid,
+  <fs_faglflexa>    TYPE zst_faglflexa,
+  <fs_ctasmayoraux> TYPE zst_bsis,
+  <fs_mapeo>        TYPE zta_dmapar.
+
+"Define Variables"
+
+"Define pantalla de Seleccion"
+"Solo podra seleccionar mayor, deudor o acreedor, si es mayor debe seleccionar si es saldo o pas"
+
+SELECTION-SCREEN BEGIN OF BLOCK a1 WITH FRAME TITLE text-001.
+PARAMETERS:
+  sociedad TYPE bukrs OBLIGATORY,
+  ejer     TYPE gjahr OBLIGATORY.
+
+SELECT-OPTIONS:
+cta_may  FOR bsis-hkont,
+deudor   FOR bsid-kunnr,
+vendor   FOR bsik-lifnr.
+
+PARAMETERS:
+  p_bsis RADIOBUTTON GROUP ci1,
+  p_bsik RADIOBUTTON GROUP ci1,
+  p_bsid RADIOBUTTON GROUP ci1.
+SELECTION-SCREEN END OF BLOCK a1.
+
+SELECTION-SCREEN BEGIN OF BLOCK a2 WITH FRAME TITLE text-002.
+"Al seleccionar cuentas de mayor se debe seleccionar una de estas opciones:
+"si selecciona saldo, se suma el saldo del año en curso ejemplo ingresos, gastos etc y se consulta faglflexa
+"si selecciona pas se ignora el año y se obtienen todas las partidas abiertas ejemplo transitorias de bancos ingresos, bancos egresos.
+PARAMETERS:
+  saldo  RADIOBUTTON GROUP ci2,
+  pas    RADIOBUTTON GROUP ci2,
+  salxoc RADIOBUTTON GROUP ci2. "saldos por objeto de costo (unicamente aplica para cebe, ceco y orden, pueden agregar mas ce si modifican la estructura.)
+SELECTION-SCREEN END OF BLOCK a2.
+
+SELECTION-SCREEN BEGIN OF BLOCK a3 WITH FRAME TITLE text-003.
+PARAMETERS:
+  cl_doc     TYPE blart OBLIGATORY,
+  p_date(10) TYPE c, "fecha en layout, saldos, los saldos se cargan a una fecha especifica, este dato se toma para armar el layout.
+  p_clave    TYPE bschl,
+  p_hkont    TYPE hkont,
+  p_file     TYPE  rlgrap-filename OBLIGATORY.
+SELECTION-SCREEN END OF BLOCK a3.
+
+* At selection screen
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_file.
+
+* Display save dialog window
+  CALL METHOD cl_gui_frontend_services=>file_save_dialog
+    EXPORTING
+*     window_title      = ' '
+      default_extension = 'txt'
+      default_file_name = 'cargainicial'
+      initial_directory = 'c:\'
+    CHANGING
+      filename          = ld_filename
+      path              = ld_path
+      fullpath          = ld_fullpath
+      user_action       = ld_result.
+
+  p_file = ld_fullpath.

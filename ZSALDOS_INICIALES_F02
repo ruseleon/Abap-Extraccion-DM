@@ -1,0 +1,494 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZSALDOS_INICIALES_F02
+*&---------------------------------------------------------------------*
+
+FORM saldos.
+
+  "arma alv/txt para layout de saldos"
+
+  LOOP AT it_faglflexa ASSIGNING <fs_faglflexa>.
+
+    wa_layoutsi-importe = wa_layoutsi-importe + <fs_faglflexa>-tsl.
+
+    AT END OF racct.
+      wa_layoutsi-numpol = <fs_faglflexa>-docnr.
+      wa_layoutsi-fecha_doc = p_date.
+      wa_layoutsi-clase_doc = cl_doc.
+      wa_layoutsi-sociedad = <fs_faglflexa>-rbukrs.
+      wa_layoutsi-fecha_cont = p_date.
+      wa_layoutsi-moneda = <fs_faglflexa>-rtcur.
+      wa_layoutsi-tipo_cam = ''.
+      wa_layoutsi-referencia = 'Cargas Iniciales'.
+      wa_layoutsi-texto_cab = 'CI Mayor'.
+      wa_layoutsi-clave_cta = p_clave.
+      wa_layoutsi-cta_mayor = <fs_faglflexa>-racct.
+      wa_layoutsi-calcula_imp = ''.
+      wa_layoutsi-indicador_imp = ''.
+      wa_layoutsi-base_imp = ''.
+      wa_layoutsi-ceco = <fs_faglflexa>-rcntr.
+      wa_layoutsi-cebe = <fs_faglflexa>-prctr.
+      wa_layoutsi-elemento_pep = ''.
+      wa_layoutsi-asignacion = ''.
+      wa_layoutsi-texto_pos = 'Carga Inicial'.
+      IF wa_layoutsi-importe < 0.
+        wa_layoutsi-importe = wa_layoutsi-importe * -1.
+      ENDIF.
+      APPEND wa_layoutsi TO it_layoutsi. "1 posicion
+
+
+      wa_layoutsi-numpol = <fs_faglflexa>-docnr.
+      wa_layoutsi-fecha_doc = p_date.
+      wa_layoutsi-clase_doc = cl_doc.
+      wa_layoutsi-sociedad = <fs_faglflexa>-rbukrs.
+      wa_layoutsi-fecha_cont = p_date.
+      wa_layoutsi-moneda = <fs_faglflexa>-rtcur.
+      wa_layoutsi-tipo_cam = ''.
+      wa_layoutsi-referencia = 'Cargas Iniciales'.
+      wa_layoutsi-texto_cab = 'CI Mayor'.
+      IF p_clave = '40'.
+        wa_layoutsi-clave_cta = '50'.
+      ENDIF.
+      wa_layoutsi-cta_mayor = p_hkont. "Contracuenta.
+      wa_layoutsi-calcula_imp = ''.
+      wa_layoutsi-indicador_imp = ''.
+      wa_layoutsi-base_imp = ''.
+      wa_layoutsi-ceco = <fs_faglflexa>-rcntr.
+      wa_layoutsi-cebe = <fs_faglflexa>-prctr.
+      wa_layoutsi-elemento_pep = ''.
+      wa_layoutsi-asignacion = ''.
+      wa_layoutsi-texto_pos = ''.
+      APPEND wa_layoutsi TO it_layoutsi. "1 posicion
+      CLEAR wa_layoutsi.
+    ENDAT.
+
+  ENDLOOP.
+ENDFORM.
+
+FORM saldospas.
+
+  "arma layout de saldos por objeto de coste"
+  it_ctasmayoraux = it_ctasmayor.
+  SORT it_ctasmayoraux BY hkont kostl prctr.
+  DELETE ADJACENT DUPLICATES FROM it_ctasmayoraux COMPARING hkont kostl prctr.
+
+
+  LOOP AT it_ctasmayoraux ASSIGNING <fs_ctasmayoraux>.
+    LOOP AT it_ctasmayor ASSIGNING <fs_ctasmayor> WHERE hkont = <fs_ctasmayoraux>-hkont AND kostl = <fs_ctasmayoraux>-kostl AND prctr = <fs_ctasmayoraux>-prctr.
+      IF <fs_ctasmayor>-bschl = '40' OR <fs_ctasmayor>-bschl = '81'.
+        wa_layoutsi-importe =  wa_layoutsi-importe + <fs_ctasmayor>-dmbtr.
+      ELSE.
+        wa_layoutsi-importe =  wa_layoutsi-importe - <fs_ctasmayor>-dmbtr.
+      ENDIF.
+    ENDLOOP.
+
+    wa_layoutsi-numpol = <fs_ctasmayor>-belnr.
+    wa_layoutsi-fecha_doc = p_date.
+    wa_layoutsi-clase_doc = cl_doc.
+    wa_layoutsi-sociedad = <fs_ctasmayor>-bukrs.
+    wa_layoutsi-fecha_cont = p_date.
+    wa_layoutsi-moneda = <fs_ctasmayor>-waers.
+    wa_layoutsi-tipo_cam = ''.
+    wa_layoutsi-referencia = 'Cargas Iniciales'.
+    wa_layoutsi-texto_cab = 'CI Mayor'.
+    wa_layoutsi-clave_cta = p_clave.
+    wa_layoutsi-cta_mayor = <fs_ctasmayor>-hkont.
+    wa_layoutsi-calcula_imp = ''.
+    wa_layoutsi-indicador_imp = ''.
+    wa_layoutsi-base_imp = ''.
+    wa_layoutsi-ceco = <fs_ctasmayor>-kostl.
+    wa_layoutsi-cebe = <fs_ctasmayor>-prctr.
+    wa_layoutsi-elemento_pep = ''.
+    wa_layoutsi-asignacion = ''.
+    wa_layoutsi-texto_pos = ''.
+    IF wa_layoutsi-importe < '0.00'.
+      wa_layoutsi-importe = wa_layoutsi-importe * -1.
+    ENDIF.
+
+    APPEND wa_layoutsi TO it_layoutsi.
+
+
+    wa_layoutsi-numpol = <fs_ctasmayor>-belnr.
+    wa_layoutsi-fecha_doc = p_date.
+    wa_layoutsi-clase_doc = cl_doc.
+    wa_layoutsi-sociedad = <fs_ctasmayor>-bukrs.
+    wa_layoutsi-fecha_cont = p_date.
+    wa_layoutsi-moneda = <fs_ctasmayor>-waers.
+    wa_layoutsi-tipo_cam = ''.
+    wa_layoutsi-referencia = 'Cargas Iniciales'.
+    wa_layoutsi-texto_cab = 'CI Mayor'.
+    IF p_clave = '40'.
+      wa_layoutsi-clave_cta = '50'.
+    ELSEIF p_clave = '50'.
+      wa_layoutsi-clave_cta = '40'.
+    ENDIF.
+    wa_layoutsi-cta_mayor = p_hkont.
+    wa_layoutsi-calcula_imp = ''.
+    wa_layoutsi-indicador_imp = ''.
+    wa_layoutsi-base_imp = ''.
+    wa_layoutsi-ceco = ''.
+    wa_layoutsi-cebe = ''.
+    wa_layoutsi-elemento_pep = ''.
+    wa_layoutsi-asignacion = ''.
+    wa_layoutsi-texto_pos = ''.
+    APPEND wa_layoutsi TO it_layoutsi.
+
+    CLEAR wa_layoutsi.
+  ENDLOOP.
+ENDFORM.
+
+FORM pasdeudor.
+  " arma layout de partidas abiertas deudor"
+
+  LOOP AT it_pasdeudor ASSIGNING <fs_pasdeudor>.
+
+    wa_layoutsi-numpol = <fs_pasdeudor>-belnr.
+
+    lv_anio = <fs_pasdeudor>-bldat(4).
+    lv_mes = <fs_pasdeudor>-bldat+4(2).
+    lv_dia = <fs_pasdeudor>-bldat+6(2).
+    CONCATENATE lv_dia '.' lv_mes '.' lv_anio '.' INTO wa_layoutsi-fecha_doc.
+
+    "   wa_layoutsi-fecha_doc = <fs_pasdeudor>-bldat.
+    wa_layoutsi-clase_doc = cl_doc.
+    wa_layoutsi-sociedad = <fs_pasdeudor>-bukrs.
+    wa_layoutsi-fecha_cont = p_date.
+    wa_layoutsi-moneda = <fs_pasdeudor>-waers.
+    wa_layoutsi-tipo_cam = ''.
+    wa_layoutsi-referencia = <fs_pasdeudor>-belnr.
+    wa_layoutsi-texto_cab = <fs_pasdeudor>-sgtxt.
+    wa_layoutsi-clave_cta = <fs_pasdeudor>-bschl.
+
+    READ TABLE it_mapeo ASSIGNING <fs_mapeo> WITH KEY vendorecc = <fs_pasproveedor>-lifnr.
+    wa_layoutsi-cta_mayor = <fs_mapeo>-deudorhana.
+    "wa_layoutsi-cta_mayor = <fs_pasdeudor>-kunnr.
+    wa_layoutsi-importe = <fs_pasdeudor>-dmbtr.
+    wa_layoutsi-calcula_imp = ''.
+    wa_layoutsi-indicador_imp = <fs_pasdeudor>-mwskz.
+    wa_layoutsi-base_imp = ''.
+    wa_layoutsi-ceco = <fs_pasdeudor>-kostl.
+    wa_layoutsi-cebe = <fs_pasdeudor>-prctr.
+    wa_layoutsi-elemento_pep = ''.
+    wa_layoutsi-asignacion = <fs_pasdeudor>-belnr.
+    wa_layoutsi-texto_pos = ''.
+    APPEND wa_layoutsi TO it_layoutsi.
+    CLEAR wa_layoutsi.
+
+    wa_layoutsi-numpol = <fs_pasdeudor>-belnr.
+    wa_layoutsi-fecha_doc = <fs_pasdeudor>-bldat.
+    wa_layoutsi-clase_doc = cl_doc.
+    wa_layoutsi-sociedad = <fs_pasdeudor>-bukrs.
+    wa_layoutsi-fecha_cont = p_date.
+    wa_layoutsi-moneda = <fs_pasdeudor>-waers.
+    wa_layoutsi-tipo_cam = ''.
+    wa_layoutsi-referencia = <fs_pasdeudor>-belnr.
+    wa_layoutsi-texto_cab = <fs_pasdeudor>-sgtxt.
+    wa_layoutsi-clave_cta = '50'.
+    wa_layoutsi-cta_mayor = p_hkont.
+    wa_layoutsi-importe = <fs_pasdeudor>-dmbtr.
+    wa_layoutsi-calcula_imp = ''.
+    wa_layoutsi-indicador_imp = <fs_pasdeudor>-mwskz.
+    wa_layoutsi-base_imp = ''.
+    wa_layoutsi-ceco = <fs_pasdeudor>-kostl.
+    wa_layoutsi-cebe = <fs_pasdeudor>-prctr.
+    wa_layoutsi-elemento_pep = ''.
+    wa_layoutsi-asignacion = <fs_pasdeudor>-belnr.
+    wa_layoutsi-texto_pos = ''.
+    APPEND wa_layoutsi TO it_layoutsi.
+    CLEAR wa_layoutsi.
+
+  ENDLOOP.
+ENDFORM.
+
+FORM pasacreedor.
+  " arma layout de partidas abiertas proveedor"
+
+  LOOP AT it_pasproveedor ASSIGNING <fs_pasproveedor>.
+
+    wa_layoutap-numpol = <fs_pasproveedor>-belnr.
+    lv_anio = <fs_pasproveedor>-bldat(4).
+    lv_mes = <fs_pasproveedor>-bldat+4(2).
+    lv_dia = <fs_pasproveedor>-bldat+6(2).
+    CONCATENATE lv_dia '.' lv_mes '.' lv_anio '.' INTO wa_layoutap-fecha_doc.
+    "wa_layoutsi-fecha_doc = <fs_pasproveedor>-bldat.
+    wa_layoutap-clase_doc = cl_doc.
+    wa_layoutap-sociedad = <fs_pasproveedor>-bukrs.
+    wa_layoutap-fecha_cont = p_date.
+    wa_layoutap-moneda = <fs_pasproveedor>-waers.
+    wa_layoutap-tipo_cam = ''.
+    wa_layoutap-referencia = <fs_pasproveedor>-belnr.
+    wa_layoutap-texto_cab = <fs_pasproveedor>-sgtxt.
+    wa_layoutap-clave_cta = <fs_pasproveedor>-bschl.
+    READ TABLE it_mapeo ASSIGNING <fs_mapeo> WITH KEY vendorecc = <fs_pasproveedor>-lifnr.
+    wa_layoutap-cta_mayor = <fs_mapeo>-vendorhana.
+    "wa_layoutsi-cta_mayor = <fs_pasproveedor>-lifnr.
+    wa_layoutap-importe = <fs_pasproveedor>-dmbtr.
+    IF <fs_pasproveedor>-bschl IS NOT INITIAL.
+      wa_layoutap-calcula_imp = 'X'.
+    ELSE.
+      wa_layoutap-calcula_imp = ''.
+    ENDIF.
+    wa_layoutap-indicador_imp = <fs_pasproveedor>-mwskz.
+    IF wa_layoutap-indicador_imp = 'V3'. "se homologa el impuesto v3 y se acumula todo en v1".
+      wa_layoutap-indicador_imp = 'V1'.
+    ENDIF.
+    wa_layoutap-base_imp = ''.
+    wa_layoutap-ceco = <fs_pasproveedor>-kostl.
+    wa_layoutap-cebe = <fs_pasproveedor>-prctr.
+    wa_layoutap-elemento_pep = ''.
+    wa_layoutap-asignacion = <fs_pasproveedor>-belnr.
+    wa_layoutap-texto_pos = ''.
+
+    "Cuando tiene mas de 1 indicador de impuestos"
+
+    IF wa_layoutap-indicador_imp = '**'. "indica que tiene mas de 1 indicador.
+
+      IF <fs_pasproveedor>-mwsk1 IS NOT INITIAL. " si no esta vacio indicador 1.
+        wa_layoutap-importe = <fs_pasproveedor>-dmbt1.
+        wa_layoutap-indicador_imp = <fs_pasproveedor>-mwsk1.
+
+        IF wa_layoutap-indicador_imp = 'V3'.
+          wa_layoutap-indicador_imp = 'V1'.
+        ENDIF.
+
+
+        APPEND wa_layoutap TO it_layoutsi.
+
+**** agrega posicion de contracuenta con indicador 1 **********
+        wa_layoutsi-numpol = <fs_pasproveedor>-belnr.
+        CONCATENATE lv_dia '.' lv_mes '.' lv_anio '.' INTO wa_layoutsi-fecha_doc.
+        "wa_layoutsi-fecha_doc = <fs_pasproveedor>-bldat.
+        wa_layoutsi-clase_doc = cl_doc.
+        wa_layoutsi-sociedad = <fs_pasproveedor>-bukrs.
+        wa_layoutsi-fecha_cont = p_date.
+        wa_layoutsi-moneda = <fs_pasproveedor>-waers.
+        wa_layoutsi-tipo_cam = ''.
+        wa_layoutsi-referencia = <fs_pasproveedor>-belnr.
+        wa_layoutsi-texto_cab = <fs_pasproveedor>-sgtxt.
+        IF <fs_pasproveedor>-bschl = '31'.
+          wa_layoutsi-clave_cta = '40'.
+        ELSE.
+          wa_layoutsi-clave_cta = '50'.
+        ENDIF.
+        wa_layoutsi-cta_mayor = p_hkont.
+        wa_layoutsi-importe = <fs_pasproveedor>-dmbt1.
+
+        IF <fs_pasproveedor>-mwsk1 IS NOT INITIAL.
+          IF <fs_pasproveedor>-mwsk1 NE 'V0'.
+            wa_layoutsi-calcula_imp = 'X'.
+          ENDIF.
+        ELSE.
+          wa_layoutsi-calcula_imp = ''.
+        ENDIF.
+
+
+        "   wa_layoutsi-calcula_imp = ''.
+        "    wa_layoutsi-indicador_imp = ''."<fs_pasproveedor>-mwskz'.
+
+        wa_layoutsi-indicador_imp = <fs_pasproveedor>-mwsk1.
+        IF wa_layoutsi-indicador_imp = 'V3'. "se homologa el impuesto v3 y se acumula todo en v1".
+          wa_layoutsi-indicador_imp = 'V1'.
+        ENDIF.
+
+        wa_layoutsi-base_imp = ''.
+        wa_layoutsi-ceco = <fs_pasproveedor>-kostl.
+        wa_layoutsi-cebe = <fs_pasproveedor>-prctr.
+        wa_layoutsi-elemento_pep = ''.
+        wa_layoutsi-asignacion = <fs_pasproveedor>-belnr.
+        wa_layoutsi-texto_pos = ''.
+        APPEND wa_layoutsi TO it_layoutsi.
+        CLEAR wa_layoutsi.
+
+      ENDIF.
+
+      IF  <fs_pasproveedor>-mwsk2 IS NOT INITIAL. " si no esta vacio indicador 2.
+        wa_layoutap-importe = <fs_pasproveedor>-dmbt2.
+        wa_layoutap-indicador_imp = <fs_pasproveedor>-mwsk2.
+        APPEND wa_layoutap TO it_layoutsi.
+
+********* "Se agrega la partida de importe del indicador 2" ********************
+
+        wa_layoutsi-numpol = <fs_pasproveedor>-belnr.
+        CONCATENATE lv_dia '.' lv_mes '.' lv_anio '.' INTO wa_layoutsi-fecha_doc.
+        "wa_layoutsi-fecha_doc = <fs_pasproveedor>-bldat.
+        wa_layoutsi-clase_doc = cl_doc.
+        wa_layoutsi-sociedad = <fs_pasproveedor>-bukrs.
+        wa_layoutsi-fecha_cont = p_date.
+        wa_layoutsi-moneda = <fs_pasproveedor>-waers.
+        wa_layoutsi-tipo_cam = ''.
+        wa_layoutsi-referencia = <fs_pasproveedor>-belnr.
+        wa_layoutsi-texto_cab = <fs_pasproveedor>-sgtxt.
+        IF <fs_pasproveedor>-bschl = '31'.
+          wa_layoutsi-clave_cta = '40'.
+        ELSE.
+          wa_layoutsi-clave_cta = '50'.
+        ENDIF.
+        wa_layoutsi-cta_mayor = p_hkont.
+        wa_layoutsi-importe = <fs_pasproveedor>-dmbt2.
+
+        IF <fs_pasproveedor>-bschl IS NOT INITIAL.
+          IF <fs_pasproveedor>-mwsk2 NE 'V0'.
+            wa_layoutsi-calcula_imp = 'X'.
+          ENDIF.
+        ELSE.
+          wa_layoutsi-calcula_imp = ''.
+        ENDIF.
+
+
+        "   wa_layoutsi-calcula_imp = ''.
+        "    wa_layoutsi-indicador_imp = ''."<fs_pasproveedor>-mwskz'.
+
+        wa_layoutsi-indicador_imp = <fs_pasproveedor>-mwsk2.
+        IF wa_layoutsi-indicador_imp = 'V3'. "se homologa el impuesto v3 y se acumula todo en v1".
+          wa_layoutsi-indicador_imp = 'V1'.
+        ENDIF.
+
+        wa_layoutsi-base_imp = ''.
+        wa_layoutsi-ceco = <fs_pasproveedor>-kostl.
+        wa_layoutsi-cebe = <fs_pasproveedor>-prctr.
+        wa_layoutsi-elemento_pep = ''.
+        wa_layoutsi-asignacion = <fs_pasproveedor>-belnr.
+        wa_layoutsi-texto_pos = ''.
+        APPEND wa_layoutsi TO it_layoutsi.
+        CLEAR wa_layoutsi.
+
+
+
+
+
+
+      ENDIF.
+      IF <fs_pasproveedor>-mwsk3 IS NOT INITIAL. " si no esta vacio indicador 3.
+        wa_layoutap-importe = <fs_pasproveedor>-dmbt3.
+        wa_layoutap-indicador_imp = <fs_pasproveedor>-mwsk3.
+        APPEND wa_layoutap TO it_layoutsi.
+
+******* Agrega posicion de indicador 3 *****************
+        wa_layoutsi-numpol = <fs_pasproveedor>-belnr.
+        CONCATENATE lv_dia '.' lv_mes '.' lv_anio '.' INTO wa_layoutsi-fecha_doc.
+        "wa_layoutsi-fecha_doc = <fs_pasproveedor>-bldat.
+        wa_layoutsi-clase_doc = cl_doc.
+        wa_layoutsi-sociedad = <fs_pasproveedor>-bukrs.
+        wa_layoutsi-fecha_cont = p_date.
+        wa_layoutsi-moneda = <fs_pasproveedor>-waers.
+        wa_layoutsi-tipo_cam = ''.
+        wa_layoutsi-referencia = <fs_pasproveedor>-belnr.
+        wa_layoutsi-texto_cab = <fs_pasproveedor>-sgtxt.
+        IF <fs_pasproveedor>-bschl = '31'.
+          wa_layoutsi-clave_cta = '40'.
+        ELSE.
+          wa_layoutsi-clave_cta = '50'.
+        ENDIF.
+        wa_layoutsi-cta_mayor = p_hkont.
+        wa_layoutsi-importe = <fs_pasproveedor>-mwsk3.
+
+        IF <fs_pasproveedor>-bschl IS NOT INITIAL.
+          IF <fs_pasproveedor>-mwsk3 NE 'V0'.
+            wa_layoutsi-calcula_imp = 'X'.
+          ENDIF.
+        ELSE.
+          wa_layoutsi-calcula_imp = ''.
+        ENDIF.
+
+
+        "   wa_layoutsi-calcula_imp = ''.
+        "    wa_layoutsi-indicador_imp = ''."<fs_pasproveedor>-mwskz'.
+
+        wa_layoutsi-indicador_imp = <fs_pasproveedor>-mwsk3.
+        IF wa_layoutsi-indicador_imp = 'V3'. "se homologa el impuesto v3 y se acumula todo en v1".
+          wa_layoutsi-indicador_imp = 'V1'.
+        ENDIF.
+
+        wa_layoutsi-base_imp = ''.
+        wa_layoutsi-ceco = <fs_pasproveedor>-kostl.
+        wa_layoutsi-cebe = <fs_pasproveedor>-prctr.
+        wa_layoutsi-elemento_pep = ''.
+        wa_layoutsi-asignacion = <fs_pasproveedor>-belnr.
+        wa_layoutsi-texto_pos = ''.
+        APPEND wa_layoutsi TO it_layoutsi.
+        CLEAR wa_layoutsi.
+
+      ENDIF.
+
+    ENDIF.
+
+
+
+
+    IF <fs_pasproveedor>-mwskz NE '**'.
+      APPEND wa_layoutap TO it_layoutsi.
+
+      wa_layoutsi-numpol = <fs_pasproveedor>-belnr.
+      CONCATENATE lv_dia '.' lv_mes '.' lv_anio '.' INTO wa_layoutsi-fecha_doc.
+      "wa_layoutsi-fecha_doc = <fs_pasproveedor>-bldat.
+      wa_layoutsi-clase_doc = cl_doc.
+      wa_layoutsi-sociedad = <fs_pasproveedor>-bukrs.
+      wa_layoutsi-fecha_cont = p_date.
+      wa_layoutsi-moneda = <fs_pasproveedor>-waers.
+      wa_layoutsi-tipo_cam = ''.
+      wa_layoutsi-referencia = <fs_pasproveedor>-belnr.
+      wa_layoutsi-texto_cab = <fs_pasproveedor>-sgtxt.
+      IF <fs_pasproveedor>-bschl = '31'.
+        wa_layoutsi-clave_cta = '40'.
+      ELSE.
+        wa_layoutsi-clave_cta = '50'.
+      ENDIF.
+      wa_layoutsi-cta_mayor = p_hkont.
+      wa_layoutsi-importe = <fs_pasproveedor>-dmbtr.
+
+      IF <fs_pasproveedor>-bschl IS NOT INITIAL.
+        IF <fs_pasproveedor>-bschl NE 'V0'.
+          wa_layoutsi-calcula_imp = 'X'.
+        ENDIF.
+      ELSE.
+        wa_layoutsi-calcula_imp = ''.
+      ENDIF.
+
+
+      "   wa_layoutsi-calcula_imp = ''.
+      "    wa_layoutsi-indicador_imp = ''."<fs_pasproveedor>-mwskz'.
+
+      wa_layoutsi-indicador_imp = <fs_pasproveedor>-mwskz.
+      IF wa_layoutsi-indicador_imp = 'V3'. "se homologa el impuesto v3 y se acumula todo en v1".
+        wa_layoutsi-indicador_imp = 'V1'.
+      ENDIF.
+
+      wa_layoutsi-base_imp = ''.
+      wa_layoutsi-ceco = <fs_pasproveedor>-kostl.
+      wa_layoutsi-cebe = <fs_pasproveedor>-prctr.
+      wa_layoutsi-elemento_pep = ''.
+      wa_layoutsi-asignacion = <fs_pasproveedor>-belnr.
+      wa_layoutsi-texto_pos = ''.
+      APPEND wa_layoutsi TO it_layoutsi.
+      CLEAR wa_layoutsi.
+
+    ENDIF.
+    CLEAR wa_layoutsi.
+
+
+
+  ENDLOOP.
+ENDFORM.
+
+FORM descarga_archivo.
+  IF it_layoutsi IS INITIAL.
+    MESSAGE 'No se encontraron datos' TYPE 'I'.
+    EXIT.
+  ENDIF.
+
+  lv_file = p_file.
+  CALL FUNCTION 'GUI_DOWNLOAD'
+    EXPORTING
+*     BIN_FILESIZE          =
+      filename              = lv_file
+      filetype              = 'ASC'
+      write_field_separator = 'X'
+*   IMPORTING
+*     FILELENGTH            =
+    TABLES
+      data_tab              = it_layoutsi.
+
+  .
+  IF sy-subrc <> 0.
+* Implement suitable error handling here
+  ENDIF.
+ENDFORM.

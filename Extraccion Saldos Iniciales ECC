@@ -1,0 +1,12 @@
+*&---------------------------------------------------------------------*
+*& Report  ZSALDOS_INICIALES
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSALDOS_INICIALES.
+
+INCLUDE zsaldos_iniciales_top.
+INCLUDE zsaldos_iniciales_f01.
+INCLUDE zsaldos_iniciales_f02.

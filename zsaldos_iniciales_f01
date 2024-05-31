@@ -1,0 +1,46 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZSALDOS_INICIALES_F01
+*&---------------------------------------------------------------------*
+
+START-OF-SELECTION.
+
+  IF p_bsis = 'X'.
+    "valida si son partidas aiertas o saldos"
+    IF saldo = 'X'. "si es saldo se consulta faglflexa
+      SELECT * INTO CORRESPONDING FIELDS OF TABLE it_faglflexa FROM faglflexa
+        WHERE racct IN cta_may
+        AND rbukrs = sociedad
+        AND ryear = ejer.
+      PERFORM saldos.
+    ELSE. "si son pas se consulta bsis.
+      SELECT * INTO CORRESPONDING FIELDS OF TABLE it_ctasmayor FROM bsis
+        WHERE bukrs = sociedad
+        AND hkont IN cta_may
+        AND gjahr = ejer.
+      PERFORM saldospas.
+
+    ENDIF.
+
+  ELSEIF p_bsid = 'X'.
+        SELECT * INTO CORRESPONDING FIELDS OF TABLE it_mapeo FROM zta_dmapar
+      WHERE clase = 'D'.
+    SELECT * INTO CORRESPONDING FIELDS OF TABLE it_pasdeudor FROM bsid
+      WHERE bukrs = sociedad
+      AND kunnr IN deudor
+      AND bstat NE 'S'.
+    PERFORM pasdeudor.
+
+  ELSEIF p_bsik = 'X'.
+    "Lee tabla para buscar equivalencias de ecc - hana"
+    SELECT * INTO CORRESPONDING FIELDS OF TABLE it_mapeo FROM zta_dmapar
+      WHERE clase = 'K'.
+
+    SELECT * INTO CORRESPONDING FIELDS OF TABLE it_pasproveedor FROM bsik
+      WHERE bukrs = sociedad
+      AND lifnr IN vendor
+      AND bstat NE 'S'.
+    PERFORM pasacreedor.
+  ENDIF.
+
+END-OF-SELECTION.
+  PERFORM descarga_archivo.
